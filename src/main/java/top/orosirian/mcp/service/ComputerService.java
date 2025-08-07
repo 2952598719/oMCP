@@ -1,10 +1,10 @@
-package top.orosirian.mcp.computer.domain.service;
+package top.orosirian.mcp.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
-import top.orosirian.mcp.computer.domain.model.ComputerFunctionRequest;
-import top.orosirian.mcp.computer.domain.model.ComputerFunctionResponse;
+import top.orosirian.mcp.model.computer.ComputerRequest;
+import top.orosirian.mcp.model.computer.ComputerResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.Properties;
 public class ComputerService {
 
     @Tool(description = "获取电脑配置")
-    public ComputerFunctionResponse queryConfig(ComputerFunctionRequest request) {
+    public ComputerResponse queryConfig(ComputerRequest request) {
         log.info("正在获取 {} 配置信息", request.getComputer());
 
         Properties properties = System.getProperties();     // 获取系统属性
@@ -29,7 +29,7 @@ public class ComputerService {
         String javaVersion = properties.getProperty("java.version");    // Java 运行时环境版本
         String osInfo = getSpecificInfo(osName);     // 根据操作系统执行特定的命令来获取更多信息
 
-        ComputerFunctionResponse response = new ComputerFunctionResponse();
+        ComputerResponse response = new ComputerResponse();
         response.setOsName(osName);
         response.setOsVersion(osVersion);
         response.setOsArch(osArch);

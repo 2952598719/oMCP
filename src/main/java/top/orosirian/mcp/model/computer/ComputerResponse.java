@@ -1,4 +1,4 @@
-package top.orosirian.mcp.computer.domain.model;
+package top.orosirian.mcp.model.computer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ComputerFunctionResponse {
+public class ComputerResponse {
 
     @JsonProperty(required = true, value = "osName")
     @JsonPropertyDescription("操作系统名称")

@@ -1,4 +1,4 @@
-package top.orosirian.mcp.computer.domain.model;
+package top.orosirian.mcp.model.computer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,10 +7,11 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ComputerFunctionRequest {
+public class ComputerRequest {
 
     @JsonProperty(required = true, value = "computer")
     @JsonPropertyDescription("电脑名称")
     private String computer;
 
 }
+

@@ -18,14 +18,6 @@ spring:
                 name: ${spring.application.name}
                 version: 1.0.0
 
-weixin:
-    api:
-        original-id:
-        app-id: wxe9a88e043d89080f
-        app-secret: 10c0f3be360810471090b37ab41c7d8f
-        template-id:
-        touser: oauWrvo4ICsDHbThvrSuigLz0q30
-
 logging:
     pattern:
         console:
