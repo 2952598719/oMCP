@@ -1,4 +1,4 @@
-package top.orosirian.mcp.model.music;
+package top.orosirian.mcp.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

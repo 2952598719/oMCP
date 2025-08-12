@@ -18,10 +18,15 @@ spring:
                 name: ${spring.application.name}
                 version: 1.0.0
 
-logging:
-    pattern:
-        console:
-    file:
-        name: data/log/${spring.application.name}.log
+app:
+    download:
+        path: /Users/peenpjchen/MyResources
+        base: https://www.bidutuijian.com
+
+#logging:
+#    pattern:
+#        console:
+#    file:
+#        name: data/log/${spring.application.name}.log
 
 
