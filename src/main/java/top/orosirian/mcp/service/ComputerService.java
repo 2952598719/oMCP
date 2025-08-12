@@ -3,10 +3,12 @@ package top.orosirian.mcp.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
-import top.orosirian.mcp.model.computer.ComputerRequest;
-import top.orosirian.mcp.model.computer.ComputerResponse;
+import top.orosirian.mcp.model.computer.ComputerInfoRequest;
+import top.orosirian.mcp.model.computer.ComputerInfoResponse;
+import top.orosirian.mcp.model.computer.ResourceRequest;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
@@ -15,8 +17,14 @@ import java.util.Properties;
 @Service
 public class ComputerService {
 
+    @Tool(description = "检查资源是否存在")
+    public boolean resourceExist(ResourceRequest request) {
+        File file = new File(request.getPath() + "/" + request.getName());
+        return file.exists();
+    }
+
     @Tool(description = "获取电脑配置")
-    public ComputerResponse queryConfig(ComputerRequest request) {
+    public ComputerInfoResponse queryConfig(ComputerInfoRequest request) {
         log.info("正在获取 {} 配置信息", request.getComputer());
 
         Properties properties = System.getProperties();     // 获取系统属性
@@ -29,7 +37,7 @@ public class ComputerService {
         String javaVersion = properties.getProperty("java.version");    // Java 运行时环境版本
         String osInfo = getSpecificInfo(osName);     // 根据操作系统执行特定的命令来获取更多信息
 
-        ComputerResponse response = new ComputerResponse();
+        ComputerInfoResponse response = new ComputerInfoResponse();
         response.setOsName(osName);
         response.setOsVersion(osVersion);
         response.setOsArch(osArch);

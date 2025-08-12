@@ -7,11 +7,14 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ComputerRequest {
+public class ResourceRequest {
 
-    @JsonProperty(required = true, value = "computer")
-    @JsonPropertyDescription("电脑名称")
-    private String computer;
+    @JsonProperty(required = true, value = "path")
+    @JsonPropertyDescription("资源路径")
+    private String path;
+
+    @JsonProperty(required = true, value = "name")
+    @JsonPropertyDescription("资源文件名")
+    private String name;
 
 }
-

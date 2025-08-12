@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ComputerResponse {
+public class ComputerInfoResponse {
 
     @JsonProperty(required = true, value = "osName")
     @JsonPropertyDescription("操作系统名称")
