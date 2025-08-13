@@ -24,21 +24,31 @@ public class QueryService {
     @Autowired
     private NovelFinder novelFinder;
 
-    @Tool(description = "获取音乐地址")
+    @Tool(description = "获取音乐url")
     public MusicResponse getMusic(MusicRequest request) throws IOException {
         log.info("正在获取 {} 歌曲", request.getMsg());
         Call<MusicResponse> call = musicApi.getMusic(request.getMsg(), "1", "json");
         return call.execute().body();
     }
 
-    @Tool(description = "获取书籍地址")
-    public NovelResponse getNovel(NovelRequest request) throws IOException {
-        if (!novelFinder.isNovelExists(request.getNovelTitle())) {
+    @Tool(description = "获取书籍url")
+    public NovelResponse getNovel(NovelRequest request) {
+        log.info("正在获取 {} 书籍", request.getNovelTitle());
+        if(!novelFinder.isNovelExists(request.getNovelTitle())) {
             throw new IllegalArgumentException("书籍不存在: " + request.getNovelTitle());
         }
         return new NovelResponse(
                 request.getNovelTitle(),
                 novelFinder.getIndexPage(request.getNovelTitle())
+        );
+    }
+
+    @Tool(description = "获取书籍记录中的第一本书")
+    public NovelResponse getFirstNovel() {
+        NovelFinder.NovelInfo novelInfo = novelFinder.getFirstBook();
+        return new NovelResponse(
+                novelInfo.getBookName(),
+                novelInfo.getBookStartUrl()
         );
     }
 

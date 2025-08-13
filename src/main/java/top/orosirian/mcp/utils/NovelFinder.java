@@ -22,11 +22,9 @@ import java.util.Map;
 @Component
 public class NovelFinder {
 
-    @Value("${app.download.path}")
-    private String downloadPath;
+    private String downloadPath = "C:/Users/29525/MyResources";
 
-    @Value("${app.download.base}")
-    private String baseUrl;
+    private String baseUrl = "https://www.bidutuijian.com";
 
     private final String API_URL = baseUrl + "/json/data.json";
 
@@ -35,6 +33,10 @@ public class NovelFinder {
     private final Map<String, NovelInfo> novelMap = new HashMap<>();
 
     private final Gson gson = new Gson();
+
+    public static void main(String[] args) {
+        new NovelFinder().init();
+    }
 
     @PostConstruct
     public void init() {
@@ -76,16 +78,25 @@ public class NovelFinder {
     }
 
     public String getIndexPage(String novelTitle) {
-        return baseUrl + "/books/" + novelTitle + "/" + novelMap.get(novelTitle).BookStartUrl;
+        NovelInfo novelInfo = novelMap.get(novelTitle);
+        return baseUrl + "/books/" + novelInfo.BookFolderName + "/" + novelInfo.BookStartUrl;
     }
 
     public String getNovelUrlName(String novelTitle) {
         return novelMap.get(novelTitle).BookFolderName;
     }
 
+    public NovelInfo getFirstBook() {
+        if(novelMap.isEmpty()) {
+            return new NovelInfo("不存在", null, null, null, null, null);
+        } else {
+            return novelMap.values().stream().findFirst().get();
+        }
+    }
+
     @Getter
     @AllArgsConstructor
-    private static class NovelInfo {
+    public static class NovelInfo {
         private String BookName;
         private String BookDescription;
         private String BookAuthor;
