@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import top.orosirian.mcp.model.download.DownloadRequest;
 import top.orosirian.mcp.model.download.DownloadResponse;
+import top.orosirian.mcp.model.download.MusicDownloadRequest;
+import top.orosirian.mcp.model.download.MusicDownloadResponse;
 import top.orosirian.mcp.model.download.NovelDownloadRequest;
 import top.orosirian.mcp.model.download.NovelDownloadResponse;
-import top.orosirian.mcp.utils.NovelFinder;
+import top.orosirian.mcp.utils.FileProcessor;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,7 +40,9 @@ import java.util.zip.ZipOutputStream;
 public class DownloadService {
 
     @Autowired
-    private NovelFinder novelFinder;
+    private FileProcessor FIleProcessor;
+    @Autowired
+    private FileProcessor fileProcessor;
 
     @Tool(description = "下载文件到路径")
     public DownloadResponse downloadFile(DownloadRequest request) {
@@ -67,15 +71,23 @@ public class DownloadService {
         }
     }
 
+    @Tool(description = "输入url下载音乐")
+    public MusicDownloadResponse downloadMusic(MusicDownloadRequest request) {
+        File music = new File(fileProcessor.getDownloadPath() + "/music/" + request.getMusicName() + ".mp3");
+        if(!music.exists()){
+            downloadFile(new DownloadRequest(request.getMusicUrl(), fileProcessor.getDownloadPath() + "/music", request.getMusicName() + ".mp3"));
+        }
+        return new MusicDownloadResponse(true);
+    }
+
     @Tool(description = "输入url下载小说")
     public NovelDownloadResponse downloadNovel(NovelDownloadRequest request) throws IOException, InterruptedException {
-        log.info("开始下载小说：[标题={}]", request.getNovelTitle());
-        List<ChapterInfo> chapterList = fetchChapterList(request.getNovelTitle(), request.getNovelIndexUrl());
-        log.info("成功获取章节列表，共{}章", chapterList.size());
-        downloadChapters(request.getNovelTitle(), chapterList);
-        log.info("章节下载完成，开始打包ZIP文件");
-        makeNovelZip(request.getNovelTitle());
-        log.info("小说打包完成：[{}]", request.getNovelTitle());
+        File novel = new File(fileProcessor.getDownloadPath() + "/novel/" + request.getNovelTitle() + ".zip");
+        if(!novel.exists()){
+            List<ChapterInfo> chapterList = fetchChapterList(request.getNovelTitle(), request.getNovelIndexUrl());
+            downloadChapters(request.getNovelTitle(), chapterList);
+            makeNovelZip(request.getNovelTitle());
+        }
         return new NovelDownloadResponse(true);
     }
 
@@ -88,28 +100,29 @@ public class DownloadService {
 
         List<ChapterInfo> chapters = new ArrayList<>();
         Elements chapterElements = response.parse().body().select("#main div table tbody tr td a");
-        String novelUrlName = novelFinder.getNovelUrlName(novelTitle);
+        String novelUrlName = FIleProcessor.getNovelUrlName(novelTitle);
 
         chapterElements.forEach(element -> {
             chapters.add(new ChapterInfo(
                     element.text().trim(),
                     element.attr("href").split("\\.")[0],
-                    novelFinder.getAPI_URL() + "/books/" + novelUrlName + "/" + element.attr("href")
+                    FIleProcessor.getNovelBaseUrl() + "/books/" + novelUrlName + "/" + element.attr("href")
             ));
         });
         return chapters;
     }
 
     private void downloadChapters(String novelName, List<ChapterInfo> chapterList) throws InterruptedException {
-        File dir = new File(novelFinder.getDownloadPath() + "/novel/" + novelName);
-        dir.mkdirs();
+        String dir = FIleProcessor.getDownloadPath() + "/novel/" + novelName;
+        File dirFile = new File(dir);
+        dirFile.mkdirs();
         CountDownLatch latch = new CountDownLatch(chapterList.size());
         ExecutorService executor = Executors.newFixedThreadPool(10);
 
         for (ChapterInfo chapter : chapterList) {
             executor.submit(() -> {
                 try {
-                    downloadChapter(chapter, dir.getAbsolutePath());
+                    downloadChapter(chapter, FIleProcessor.getDownloadPath() + "/novel/" + novelName);
                 } catch (Exception e) {
                     System.err.println("章节下载失败: " + chapter.title + " - " + e.getMessage());
                 } finally {
@@ -129,20 +142,18 @@ public class DownloadService {
                 .get()
                 .selectXpath("//*[@id=\"main\"]/div[2]");
         String htmlContent = contentElement.html()
-                .replaceAll("<div[^>]*>", "\n")
-                .replaceAll("</div>", "")
                 .replaceAll("<p>", "")
-                .replaceAll("</p>", "\n\n")
+                .replaceAll("</p>", "")
                 .replaceAll("<br\\s*/?>", "\n");
-        String fileName = String.format("%s/%s %s.txt", dir, chapter.index, chapter.title.replaceAll("[\\\\/:*?\"<>|]", ""));
+        String fileName = String.format("%s/%s %s.txt", dir, chapter.index, chapter.title);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             writer.write(htmlContent);
         }
     }
 
     private void makeNovelZip(String novelName) throws IOException {
-        String novelDir = novelFinder.getDownloadPath() + "/novel/" + novelName;
-        String zipPath = novelFinder.getDownloadPath() + "/novel/" + novelName + ".zip";
+        String novelDir = FIleProcessor.getDownloadPath() + "/novel/" + novelName;
+        String zipPath = FIleProcessor.getDownloadPath() + "/novel/" + novelName + ".zip";
         Files.deleteIfExists(Paths.get(zipPath));
         try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipPath))) {
             Files.walk(Paths.get(novelDir))
@@ -154,10 +165,11 @@ public class DownloadService {
                             Files.copy(path, zos);
                             zos.closeEntry();
                         } catch (IOException e) {
-                            // 处理异常
+                            System.err.println(e.getMessage());
                         }
                     });
         }
+        System.err.println("压缩成功");
         // 删除原始文件夹
 //        FileUtils.deleteDirectory(new File(bookPath));
     }

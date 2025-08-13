@@ -10,7 +10,7 @@ import top.orosirian.mcp.model.resource.MusicRequest;
 import top.orosirian.mcp.model.resource.MusicResponse;
 import top.orosirian.mcp.model.resource.NovelRequest;
 import top.orosirian.mcp.model.resource.NovelResponse;
-import top.orosirian.mcp.utils.NovelFinder;
+import top.orosirian.mcp.utils.FileProcessor;
 
 import java.io.IOException;
 
@@ -22,7 +22,7 @@ public class QueryService {
     private MusicApi musicApi;
 
     @Autowired
-    private NovelFinder novelFinder;
+    private FileProcessor fileProcessor;
 
     @Tool(description = "获取音乐url")
     public MusicResponse getMusic(MusicRequest request) throws IOException {
@@ -34,18 +34,18 @@ public class QueryService {
     @Tool(description = "获取书籍url")
     public NovelResponse getNovel(NovelRequest request) {
         log.info("正在获取 {} 书籍", request.getNovelTitle());
-        if(!novelFinder.isNovelExists(request.getNovelTitle())) {
+        if(!fileProcessor.isNovelExists(request.getNovelTitle())) {
             throw new IllegalArgumentException("书籍不存在: " + request.getNovelTitle());
         }
         return new NovelResponse(
                 request.getNovelTitle(),
-                novelFinder.getIndexPage(request.getNovelTitle())
+                fileProcessor.getIndexPage(request.getNovelTitle())
         );
     }
 
     @Tool(description = "获取书籍记录中的第一本书")
     public NovelResponse getFirstNovel() {
-        NovelFinder.NovelInfo novelInfo = novelFinder.getFirstBook();
+        FileProcessor.NovelInfo novelInfo = fileProcessor.getFirstBook();
         return new NovelResponse(
                 novelInfo.getBookName(),
                 novelInfo.getBookStartUrl()

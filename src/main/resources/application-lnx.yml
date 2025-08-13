@@ -1,0 +1,32 @@
+server:
+    port: 8091
+    servlet:
+        encoding:
+            charset: UTF-8
+            force: true
+            enabled: true
+
+spring:
+    application:
+        name: mcp
+    main:
+        banner-mode: off
+        web-application-type: none
+    ai:
+        mcp:
+            server:
+                name: ${spring.application.name}
+                version: 1.0.0
+
+app:
+    download:
+        path: /home/MyResources
+        base: https://www.bidutuijian.com
+
+#logging:
+#    pattern:
+#        console:
+#    file:
+#        name: data/log/${spring.application.name}.log
+
+

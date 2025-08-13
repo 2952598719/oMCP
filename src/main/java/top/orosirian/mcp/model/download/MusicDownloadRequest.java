@@ -9,10 +9,14 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NovelDownloadResponse {
+public class MusicDownloadRequest {
 
-    @JsonProperty(required = true, value = "success")
-    @JsonPropertyDescription("是否下载成功")
-    private Boolean success;
+    @JsonProperty(required = true, value = "musicName")
+    @JsonPropertyDescription("歌名")
+    private String musicName;
+
+    @JsonProperty(required = true, value = "musicUrl")
+    @JsonPropertyDescription("歌曲url")
+    private String musicUrl;
 
 }

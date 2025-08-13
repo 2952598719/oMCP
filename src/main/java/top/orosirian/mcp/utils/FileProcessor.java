@@ -20,27 +20,31 @@ import java.util.Map;
 
 @Data
 @Component
-public class NovelFinder {
+public class FileProcessor {
 
-    private String downloadPath = "C:/Users/29525/MyResources";
+    @Value("${app.download.path}")
+    private String downloadPath;
 
-    private String baseUrl = "https://www.bidutuijian.com";
+    @Value("${app.download.base}")
+    private String novelBaseUrl;
 
-    private final String API_URL = baseUrl + "/json/data.json";
+    private String NOVEL_LIST_URL;
 
-    private final String NOVEL_INDEX_PATH = downloadPath + "/novel/books.json";
+    private String NOVEL_INDEX_PATH;
 
     private final Map<String, NovelInfo> novelMap = new HashMap<>();
 
     private final Gson gson = new Gson();
 
     public static void main(String[] args) {
-        new NovelFinder().init();
+        new FileProcessor().init();
     }
 
     @PostConstruct
     public void init() {
         try {
+            NOVEL_LIST_URL = novelBaseUrl + "/json/data.json";
+            NOVEL_INDEX_PATH = downloadPath + "/novel/books.json";
             File dir = new File(downloadPath + "/novel");
             dir.mkdirs();
             if (Files.exists(Paths.get(NOVEL_INDEX_PATH))) {
@@ -58,7 +62,7 @@ public class NovelFinder {
     @Scheduled(fixedRate = 24 * 60 * 60 * 1000) // 每24小时自动更新
     public synchronized void updateNovelIndex() {
         try {
-            String jsonData = Jsoup.connect(API_URL)
+            String jsonData = Jsoup.connect(NOVEL_LIST_URL)
                     .header("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
                     .ignoreContentType(true)
                     .timeout(15000)
@@ -69,7 +73,7 @@ public class NovelFinder {
             novels.forEach(novel -> novelMap.put(novel.getBookName(), novel));
             Files.write(Paths.get(NOVEL_INDEX_PATH), jsonData.getBytes());
         } catch (Exception e) {
-            // 保持原有数据
+            System.err.println("更新书籍index失败");
         }
     }
 
@@ -79,7 +83,7 @@ public class NovelFinder {
 
     public String getIndexPage(String novelTitle) {
         NovelInfo novelInfo = novelMap.get(novelTitle);
-        return baseUrl + "/books/" + novelInfo.BookFolderName + "/" + novelInfo.BookStartUrl;
+        return novelBaseUrl + "/books/" + novelInfo.BookFolderName + "/" + novelInfo.BookStartUrl;
     }
 
     public String getNovelUrlName(String novelTitle) {

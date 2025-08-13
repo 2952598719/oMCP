@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class NovelDownloadResponse {
+public class MusicDownloadResponse {
 
     @JsonProperty(required = true, value = "success")
     @JsonPropertyDescription("是否下载成功")
